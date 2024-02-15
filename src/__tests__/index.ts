@@ -302,6 +302,15 @@ const sample_input = [
       },
     ],
   },
+  {
+    type: 'mention',
+    children: [
+      {
+        text: ''
+      },
+    ],
+    value: 'myRandomUsername'
+  }
 ]
 
 // actual spacer is <SPACE><SPACE>\n
@@ -343,7 +352,7 @@ ${spacer}
 
 porumai **patience** *amaidhi*${spacer}
 ${spacer}
-`
+myRandomUsername`
 
 /* const complex_input = [
   {

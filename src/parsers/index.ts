@@ -14,6 +14,7 @@ import codeBlockParser, { isCodeBlock } from './code-block'
 import headingParser, { isHeading } from './heading'
 import listParser, { isList } from './lists'
 import actionItemParser, { isActionItem } from './action-item'
+import mentionParser, { isMention } from './mention'
 
 // helper function to recursively parse nodes to final markdown
 export function parseNodes(nodes: Array<SlateNode>): string {
@@ -53,6 +54,11 @@ function transformNode(node: SlateNode): string {
   // Heading
   if (isHeading(node)) {
     return headingParser(node.children, node.type)
+  }
+
+  // Mention
+  if (isMention(node)) {
+    return mentionParser(node)
   }
 
   // Paragraph

@@ -21,6 +21,8 @@ export enum NodeType {
   ActionItem = 'action_item',
   List = 'li',
   ListChild = 'lic',
+
+  Mention = "mention"
 }
 
 // single leaf node
@@ -43,6 +45,7 @@ export type Children = Array<SlateNode | LeafNode>
 export type SlateNode = {
   type: string
   checked?: boolean
+  value?: string
   children: Children
 }
 
