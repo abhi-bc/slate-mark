@@ -32,6 +32,11 @@ function transformNode(node: SlateNode): string {
   // TODO: verify if ordering of nodes matter (though we have strict checking of nodes)
   // for now we are parsing in some random order
 
+  // Mention
+  if (isMention(node)) {
+    return mentionParser(node)
+  }
+
   // Lists - Ordered/Unordered
   if (isList(node)) {
     return listParser(node)
@@ -54,11 +59,6 @@ function transformNode(node: SlateNode): string {
   // Heading
   if (isHeading(node)) {
     return headingParser(node.children, node.type)
-  }
-
-  // Mention
-  if (isMention(node)) {
-    return mentionParser(node)
   }
 
   // Paragraph

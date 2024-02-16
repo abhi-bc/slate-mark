@@ -60,6 +60,10 @@ function parseInlineCode({ text }: LeafNode): string {
 }
 
 export function parseMark(input: LeafNode): string {
+  if (input.type === 'mention') {
+    return input.value || ''
+  }
+
   const finalText = {
     text: input.text,
   }

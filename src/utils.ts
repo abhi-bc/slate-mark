@@ -36,6 +36,8 @@ interface Mark {
 }
 
 export interface LeafNode extends Mark {
+  type?: string
+  value?: string
   text: string
 }
 

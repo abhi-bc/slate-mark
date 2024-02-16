@@ -1,7 +1,7 @@
-import { isLeaf, NodeType, SlateNode } from '../utils'
+import { NodeType, SlateNode } from '../utils'
 
 export function isMention(node: SlateNode): boolean {
-  return isLeaf(node.children) && node.type === NodeType.Mention
+  return node.type === NodeType.Mention
 }
 
 function parse(node: SlateNode): string {
