@@ -22,7 +22,8 @@ export enum NodeType {
   List = 'li',
   ListChild = 'lic',
 
-  Mention = "mention"
+  Mention = "mention",
+  Link = "a"
 }
 
 // single leaf node
@@ -38,7 +39,9 @@ interface Mark {
 export interface LeafNode extends Mark {
   type?: string
   value?: string
+  url?: string
   text: string
+  children?: Children
 }
 
 // export type Children = Array<SlateNode> | LeafChildren
@@ -48,6 +51,7 @@ export type SlateNode = {
   type: string
   checked?: boolean
   value?: string
+  url?: string
   children: Children
 }
 

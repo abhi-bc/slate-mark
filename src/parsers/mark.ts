@@ -1,4 +1,4 @@
-import { LeafNode, LeafChildren, spacer } from '../utils'
+import { LeafNode, LeafChildren, spacer, NodeType, recurseParse } from '../utils'
 
 /*
  * Mark (main text parser)
@@ -60,8 +60,14 @@ function parseInlineCode({ text }: LeafNode): string {
 }
 
 export function parseMark(input: LeafNode): string {
-  if (input.type === 'mention') {
+  if (input.type === NodeType.Mention) {
     return input.value || ''
+  }
+
+  if (input.type === NodeType.Link && Array.isArray(input.children) && input.url) {
+    const url = input.url
+    const text = recurseParse(input.children)
+    return `[${text}](${url})`
   }
 
   const finalText = {
