@@ -1,184 +1,42 @@
-import {
-  NodeType,
-  LeafNode,
-  SlateNode,
-  isLeaf,
-  isLeafNode,
-  Children,
-} from '../utils'
+import { LeafNode, NodeType, SlateNode } from '../utils'
 import { parseMarks } from './mark'
 
 type ListChild = {
   type: NodeType.ListChild
-  children: [LeafNode]
+  children: LeafNode[]
 }
 
-type ListElement = [
-  {
-    type: NodeType.List
-    children: [ListChild]
-  }
-]
+type ListElement = {
+  type: NodeType.List
+  children: Array<ListChild | OrderedList | UnorderedList>
+}
 
-type OrderedList = {
+type OrderedList = SlateNode & {
   type: NodeType.OrderedList
-  children: ListElement
+  children: ListElement[]
 }
 
-type UnorderedList = {
+type UnorderedList = SlateNode & {
   type: NodeType.UnorderedList
-  children: ListElement
+  children: ListElement[]
+}
+// const allListTypes = [NodeType.OrderedList, NodeType.UnorderedList, NodeType.ListChild, NodeType.List]
+
+function isUnorderedList(node: SlateNode) {
+  return node.type === NodeType.UnorderedList
 }
 
-// checks if it is a proper list
-function isProperListElement(children: Children): children is ListElement {
-  if (isLeaf(children)) {
-    return false
-  }
-
-  let isCorrectType = false
-
-  children.forEach(n => {
-    // we should not have a leaf element
-    if (isLeafNode(n)) {
-      return
-    }
-
-    // we should have a 'li' element
-    if (n.type !== NodeType.List) {
-      return
-    }
-
-    // we have List type here
-    isCorrectType = checkListType(n.children)
-  })
-
-  return isCorrectType
-}
-
-// predicate to check if we have a list type
-/* 
- 'Lists' detection - Ordered, Unordered
-/*
-
-{
-    type: 'ul',
-    children: [
-      {
-        type: 'li',
-        children: [
-          {
-            type: 'lic',
-            children: [
-              {
-                text: 'porumai',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: 'li',
-        children: [
-          {
-            type: 'lic',
-            children: [
-              {
-                text: 'amaidhi',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: 'li',
-        children: [
-          {
-            type: 'lic/p',
-            children: [
-              {
-                text: 'paience',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-
-*/
-
-function checkListType(children: Children): children is ListElement {
-  // Checks:
-
-  // - each 'li' should have exactly one 'lic' children / or one 'p' element
-
-  /*  
-    children: [
-      {
-        type: 'lic/p',
-        children: [
-          {
-            text: 'porumai',
-          },
-        ],
-      },
-    ],
-   */
-
-  // firstLicChild should not be a leaf node
-  if (isLeaf(children)) {
-    return false
-  }
-
-  const hasOneLicChild = children.length === 1
-  if (!hasOneLicChild) {
-    return false
-  }
-
-  const firstLicChild = children[0]
-
-  if (isLeafNode(firstLicChild)) {
-    return false
-  }
-
-  // should be of type 'lic'
-  // or of type 'p'
-  const isListChild = firstLicChild.type === NodeType.ListChild
-  const isDefaultChild = firstLicChild.type === NodeType.Default
-  const isValidChild = isListChild || isDefaultChild
-
-  if (!isValidChild) {
-    return false
-  }
-
-  // now firstLicChild children will be a leaf type
-  if (!isLeaf(firstLicChild.children)) {
-    return false
-  }
-
-  // I think we have correct list type !!!
-  return true
-}
-
-function isUnorderedList(node: SlateNode): node is UnorderedList {
-  if (node.type !== NodeType.UnorderedList) {
-    return false
-  }
-
-  return isProperListElement(node.children)
-}
-
-function isOrderedList(node: SlateNode): node is OrderedList {
-  if (node.type !== NodeType.OrderedList) {
-    return false
-  }
-
-  return isProperListElement(node.children)
+function isOrderedList(node: SlateNode) {
+  return node.type === NodeType.OrderedList
 }
 
 export function isList(node: SlateNode): boolean {
   return isUnorderedList(node) || isOrderedList(node)
+}
+
+const generateSpacedAsterisk = (nestLevel: number, isOrderedList = false, index = 1) => {
+  const delimiter = isOrderedList ? `${index}. ` : '- '
+  return ' '.repeat(nestLevel * 4) + delimiter
 }
 
 /*
@@ -187,40 +45,62 @@ export function isList(node: SlateNode): boolean {
  * Ordered List:
  * 1) Item 1
  * 2) Item 2
+ *   1) Item 2.1
+ *   2) Item 2.2
  * 3) Item 3
  *
  * Unordered List:
  * * Item 1
+ *   * Item 1.1
+ *   * Item 1.2
  * * Item 2
  * * Item 3
  *
  */
+
+type QueueElement = ListElement & { nestLevel: number; ordered: boolean; index: number }
+
+const generateQueue = (rootNode: OrderedList | UnorderedList, nestLevel = 0): QueueElement[] => {
+  return (rootNode.children as ListElement[]).map((li, index) => ({
+    ...li,
+    nestLevel,
+    index: index + 1,
+    ordered: rootNode.type === NodeType.OrderedList,
+  }))
+}
+
+export const whileListMD = (rootNode: OrderedList | UnorderedList): string => {
+  let result = '\n'
+  const queue: QueueElement[] = generateQueue(rootNode)
+
+  while (queue.length > 0) {
+    const node = queue.shift() as QueueElement
+
+    for (let i = 0; i < node.children.length; i++) {
+      const child = node.children[i]
+
+      if (child.type === NodeType.ListChild) {
+        result += generateSpacedAsterisk(node.nestLevel, node.ordered, node.index) + parseMarks(child.children as LeafNode[]) + '\n'
+      } else if ([NodeType.OrderedList, NodeType.UnorderedList].includes(child.type as NodeType)) {
+        queue.unshift(...generateQueue(child, node.nestLevel + 1))
+      }
+    }
+  }
+
+  return result + '\n'
+}
 
 function parse(node: SlateNode): string {
   if (!isList(node)) {
     return ``
   }
 
-  if (!isProperListElement(node.children)) {
-    return ``
+  try {
+    return whileListMD(node as OrderedList | UnorderedList)
+  } catch (error) {
+    console.log('Error in parsing list', error)
+    return '\n'
   }
-
-  // we will have a proper list
-  // let us extract the list items (with formatting with marks if needed)
-  const listItems = node.children.map(n => {
-    return parseMarks(n.children[0].children)
-  })
-
-  let FINAL_TEXT = ``
-
-  // now we have the list items
-  // let us construct the list
-  listItems.forEach((text, index) => {
-    const prefix = node.type === NodeType.OrderedList ? `${index + 1}.` : '-'
-    FINAL_TEXT += `${prefix} ${text}\n`
-  })
-
-  return FINAL_TEXT + '\n'
 }
 
 export default parse
