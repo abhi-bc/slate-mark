@@ -23,6 +23,7 @@ export enum NodeType {
   ListChild = 'lic',
 
   Mention = "mention",
+  MentionChannel = "mention_channel",
   Link = "a"
 }
 

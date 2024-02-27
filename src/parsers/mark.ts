@@ -60,7 +60,7 @@ function parseInlineCode({ text }: LeafNode): string {
 }
 
 export function parseMark(input: LeafNode): string {
-  if (input.type === NodeType.Mention) {
+  if (input.type === NodeType.Mention || input.type === NodeType.MentionChannel) {
     return input.value || ''
   }
 
