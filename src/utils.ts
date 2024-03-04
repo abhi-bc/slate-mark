@@ -24,6 +24,7 @@ export enum NodeType {
 
   Mention = "mention",
   MentionChannel = "mention_channel",
+  MentionEmoji = "mention_emoji",
   Link = "a"
 }
 
