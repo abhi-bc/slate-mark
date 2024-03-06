@@ -6,6 +6,7 @@ export enum NodeType {
   Paragraph = 'paragraph',
   BlockQuote = 'blockquote',
   CodeBlock = 'code_block',
+  CodeLine = 'code_line',
 
   // headings
   H1 = 'h1',

@@ -10,7 +10,7 @@ import { SlateNode } from '../utils'
 // individual parsers
 import paragraphParser, { isParagraph } from './paragraph'
 import blockQuoteParser, { isBlockQuote } from './block-quote'
-import codeBlockParser, { isCodeBlock } from './code-block'
+import codeBlockParser, { isCodeBlock, isCodeLine, parseCodeLine } from './code-block'
 import headingParser, { isHeading } from './heading'
 import listParser, { isList } from './lists'
 import actionItemParser, { isActionItem } from './action-item'
@@ -55,6 +55,11 @@ function transformNode(node: SlateNode): string {
   // Code Block
   if (isCodeBlock(node)) {
     return codeBlockParser(node.children)
+  }
+
+  // Code Block
+  if (isCodeLine(node)) {
+    return parseCodeLine(node)
   }
 
   // Heading

@@ -1,4 +1,5 @@
-import { NodeType, SlateNode, isLeaf, Children, recurseParse } from '../utils'
+import { NodeType, SlateNode, isLeaf, Children, recurseParse, LeafNode } from '../utils'
+import { parseMarks } from './mark'
 
 /* 
  'Code Block' detection
@@ -13,8 +14,13 @@ import { NodeType, SlateNode, isLeaf, Children, recurseParse } from '../utils'
   },
  */
 export function isCodeBlock(node: SlateNode): boolean {
-  return isLeaf(node.children) && node.type === NodeType.CodeBlock
+  return node.type === NodeType.CodeBlock
 }
+
+export function isCodeLine(node: SlateNode): boolean {
+  return isLeaf(node.children) && node.type === NodeType.CodeLine
+}
+
 
 /*
  * Code Block (parser)
@@ -34,6 +40,10 @@ function parse(input: Children): string {
   // following blank lines to be included in codeblock
 
   return `${FENCE}\n${content}\n${FENCE}\n\n`
+}
+
+export function parseCodeLine(node: SlateNode): string {
+  return parseMarks(node.children as LeafNode[]) + '\n'
 }
 
 export default parse
