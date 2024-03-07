@@ -1,42 +1,22 @@
-# slate-mark
+## Plate (aka Slate) to Markdown
+This plugin was originally forked from https://github.com/palerdot/slate-mark, which has a few bugs and hasn't been updated in quite a while. It works out of the box with [PlateJS](https://platejs.org), but still has quite a few bugs. Additionally, in Towns, we have implemented a few features that are not present in the original PlateJS plugin, e.g. @mentions, #channel-hashtags, and emoji support.
 
-Slate to Markdown parser. 
-
-Compatible with [plate-editor](https://github.com/udecode/plate/) out of the box. 
+Following features were added to the original plugin:
+1. Nested list support - both ordered and unordered. Initial plugin didn't support nested lists at all. Logic was re-written using depth-first search algorithm with a queue.
+2. Code block support - initial plugin didn't support code blocks correctly
+3. `@mentions` support for users
+4. `#hashtags` support for channels
+5. emoji support through lookup
+6. Typescript fixes were added to work with latest PlateJS version
 
 ## Usage
-
 ```javascript
-// if using with typescript, import type from '@udecode/plate-core' or `@udecode/plate`
-// please make sure your input has similar strucutre to TNode
-import type { TNode } from '@udecode/plate-core'
-// or 
-// import type { TNode } from '@udecode/plate'
+import { plateToMarkdownAsync } from './utils/slateToMD';
 
-import { plateToMarkdown, plateToMarkdownAsync } from 'slate-mark'
-
-// input type is `TNode` (https://plate-api.udecode.io/modules.html#tnode)
-const myInput: TNode = [
-    {
-    type: 'p',
-    children: [
-      {
-        text: 'Hello `universe !!!`',
-      },
-    ],
-  },
-  ...
-]
-
-// sync version
-// output will be a markdown string
-const output = plateToMarkdown(myInput)
-
-// async/promise version
-plateToMarkdownAsync(myInput)
-    .then(result => {
-        // result will be a markdown string
-    })
+const onSend = async () => {
+  const markdown = await plateToMarkdownAsync(editor.children);
+  // send markdown to server
+}
 ```
 
-*Please make sure you have either `@udecode/plate-core` or `@udecode/plate` as your dependency if you are using it with typescript. The input type for the parser utility functions is [TNode](https://plate-api.udecode.io/modules.html#tnode)*
+For more usage, see original README.md in the [original repo](https://github.com/palerdot/slate-mark)
