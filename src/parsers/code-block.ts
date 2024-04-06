@@ -39,7 +39,7 @@ function parse(input: Children): string {
   // IMPORTANT: insert two new lines to prevent
   // following blank lines to be included in codeblock
 
-  return `${FENCE}\n${content}\n${FENCE}\n\n`
+  return `${FENCE}\n${content}${FENCE}\n\n`
 }
 
 export function parseCodeLine(node: SlateNode): string {
